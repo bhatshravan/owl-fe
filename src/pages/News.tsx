@@ -75,7 +75,7 @@ export default function News() {
       <div className="container mx-auto p-6 flex flex-col items-center">
         <div className="w-full max-w-4xl space-y-6">
           {newsQuery.data &&
-            newsQuery.data.articles.map((article: any, index: number) => (
+            newsQuery.data.results.map((article: any, index: number) => (
               <Card key={index} className="w-full shadow-md transition-shadow hover:shadow-lg dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold leading-tight text-foreground">
@@ -89,7 +89,7 @@ export default function News() {
                 </CardContent>
                 <CardFooter className="flex gap-2">
                    <Button asChild className="bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white">
-                      <a href={article.url} target="_blank" rel="noopener noreferrer">
+                      <a href={article.link} target="_blank" rel="noopener noreferrer">
                         Read more
                         <svg
                           className="ml-2 -mr-1 w-4 h-4"
