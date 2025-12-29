@@ -27,6 +27,7 @@ export default function Login() {
       if (response && response.data.token) {
         localStorage.setItem("Auth", response.data.token);
         navigate("/");
+        window.location.reload();
       } else {
         setError("Login failed. Please check your credentials.");
       }
