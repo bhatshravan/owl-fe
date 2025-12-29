@@ -7,7 +7,7 @@ import { QueryClientProvider } from "react-query";
 import { QueryClient } from "react-query";
 import { useQueryCall } from "./Utils/api";
 import { Spinner } from "./components/ui/spinner";
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import Positions from "./pages/Positions";
 import { Shoonya } from "./pages/Shoonya";
 
