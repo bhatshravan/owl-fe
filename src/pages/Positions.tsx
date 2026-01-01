@@ -1,9 +1,10 @@
-import { Flex, Table } from "antd";
+import { Flex, Table, Typography } from "antd";
 import { useQueryCall } from "@/Utils/api";
 import { Spinner } from "@/components/ui/spinner";
 export default function Positions() {
   const positions = useQueryCall("positions", "get", "POSITIONS", {});
   const { data }: any = positions;
+  const { Title } = Typography;
 
   if (positions.isLoading) {
     return (
@@ -14,15 +15,19 @@ export default function Positions() {
   }
 
   return (
-    <Flex vertical align="center" justify="center">
+    <Flex vertical align="center" justify="center" gap={"large"}>
+      <Title level={2}>Positions</Title>
       <Table
-        dataSource={data?.data?.net || []}
+        pagination={false}
+        dataSource={data.data?.net || []}
         columns={[
           {
             title: "Symbol",
             dataIndex: "tradingsymbol",
             key: "tradingsymbol",
             width: 180,
+            sorter: (a: any, b: any) =>
+              a.tradingsymbol.localeCompare(b.tradingsymbol),
           },
           {
             title: "Qty",
@@ -30,6 +35,7 @@ export default function Positions() {
             key: "quantity",
             align: "right" as const,
             width: 80,
+            sorter: (a: any, b: any) => a.quantity - b.quantity,
           },
           {
             title: "Avg Price",
@@ -38,6 +44,7 @@ export default function Positions() {
             align: "right" as const,
             width: 100,
             render: (price: number) => price.toFixed(2),
+            sorter: (a: any, b: any) => a.average_price - b.average_price,
           },
           {
             title: "Last Price",
@@ -46,6 +53,7 @@ export default function Positions() {
             align: "right" as const,
             width: 100,
             render: (price: number) => price.toFixed(2),
+            sorter: (a: any, b: any) => a.last_price - b.last_price,
           },
           {
             title: "Value",
@@ -54,6 +62,7 @@ export default function Positions() {
             align: "right" as const,
             width: 100,
             render: (value: number) => value.toFixed(2),
+            sorter: (a: any, b: any) => a.value - b.value,
           },
           {
             title: "P&L",
@@ -66,6 +75,7 @@ export default function Positions() {
                 {pnl.toFixed(2)}
               </span>
             ),
+            sorter: (a: any, b: any) => a.pnl - b.pnl,
           },
           {
             title: "M2M",
@@ -78,6 +88,7 @@ export default function Positions() {
                 {m2m.toFixed(2)}
               </span>
             ),
+            sorter: (a: any, b: any) => a.m2m - b.m2m,
           },
         ]}
       />

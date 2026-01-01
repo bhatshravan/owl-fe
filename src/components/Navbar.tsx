@@ -19,7 +19,7 @@ export function Navbar() {
             <Link to="/news">News</Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link to="/news">AutoLogin</Link>
+            <Link to="/shoonya">Websocket</Link>
           </Button>
 
           <Button variant="ghost" asChild>
