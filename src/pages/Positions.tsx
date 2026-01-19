@@ -1,11 +1,18 @@
-import { Flex, Table, Typography } from "antd";
+import { Flex, Result, Table, Typography } from "antd";
 import { useQueryCall } from "@/Utils/api";
 import { Spinner } from "@/components/ui/spinner";
 export default function Positions() {
+
   const positions = useQueryCall("positions", "get", "POSITIONS", {});
-  const { data }: any = positions;
+  const { data: rawData }: any = positions;
+  const { data }: any = rawData;
   const { Title } = Typography;
 
+  if(positions.error){
+    return (
+      <Result status={"error"} title="Something went wrong" />
+    )
+  }
   if (positions.isLoading) {
     return (
       <Flex vertical align="center" justify="center">

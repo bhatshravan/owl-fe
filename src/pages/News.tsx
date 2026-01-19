@@ -1,4 +1,4 @@
-import { useApiCall } from "@/Utils/api";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -17,17 +17,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQueryCall } from "@/Utils/api";
 
 export default function News() {
   const [opened, setOpened] = useState(false);
   const [modalData] = useState("");
-  const newsQuery = useApiCall(
-    "news",
-    "get",
-    "https://newsdata.io/api/1/latest?apikey=pub_9eca01aef3494be0aff12bcf9127dbce&country=in&language=en&category=business"
-    // "https://vtu.bitstreak.in/papers/subject/PHYSICS_CYCLE/2018/1"
-    // "https://trade.bitstreak.in/news"
-  );
+    const newsQuery = useQueryCall("news", "get", "NEWS", {});
+  const { data }: any = newsQuery;
+  
 
   // pub_9eca01aef3494be0aff12bcf9127dbce
 
@@ -74,8 +71,8 @@ export default function News() {
 
       <div className="container mx-auto p-6 flex flex-col items-center">
         <div className="w-full max-w-4xl space-y-6">
-          {newsQuery.data &&
-            newsQuery.data.results.map((article: any, index: number) => (
+          {data && Array.isArray(data?.results) &&
+            data?.results.map((article: any, index: number) => (
               <Card key={index} className="w-full shadow-md transition-shadow hover:shadow-lg dark:border-gray-700">
                 <CardHeader>
                   <CardTitle className="text-2xl font-bold leading-tight text-foreground">

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ENDPOINTS } from "./endpoints";
 
 export const API = axios.create({
@@ -51,41 +51,40 @@ export async function fetchData(method: any, url: any, data: any) {
   return apiData;
 }
 
-export function useLocalCall(
-  query: any,
-  method: any,
-  url: any,
-  dataInput: any = {}
-) {
-  return useQuery(query, async () => {
-    const { data } = await API({
-      method,
-      url,
-      data: dataInput,
-    });
-    return data;
-  });
-}
-export function useApiCall(
-  query: any,
-  method: any,
-  url: any,
-  dataInput: any = {},
-  options: any = {}
-) {
-  return useQuery(
-    query,
-    async () => {
-      const { data } = await API({
-        method,
-        url,
-        data: dataInput,
-      });
-      return data;
-    },
-    options
-  );
-}
+// export function useLocalCall(
+//   query: any,
+//   method: any,
+//   url: any,
+//   dataInput: any = {}
+// ) {
+//   return useQuery(query, () => {
+//     const { data } = await API({
+//       method,
+//       url,
+//       data: dataInput,
+//     });
+//     return data;
+//   });
+// }
+// export function useApiCall(
+//   query: any,
+//   method: any,
+//   url: any,
+//   dataInput: any = {},
+//   options: any = {}
+// ) {
+//   return useQuery(
+//     query,
+//     async () => {
+//       const { data } = await API({
+//         method,
+//         url,
+//         data: dataInput,
+//       });
+//       return data;
+//     },
+//   );
+// }
 
 export async function runAxios(method: any, url: any, data: any) {
   const resp = await API({
@@ -112,14 +111,13 @@ export const useQueryCall = (
 ) => {
   return useQuery({
     queryKey: query,
-    queryFn: async () => {
+    queryFn: ():any => {
       const endpoint = ENDPOINTS[url];
-      const { data }: any = await API({
+      return API({
         method,
         url: endpoint as string,
         data: dataInput,
       });
-      return data;
     },
     ...options,
   });

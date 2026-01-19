@@ -1,7 +1,5 @@
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
-import { QueryClientProvider } from "react-query";
-import { QueryClient } from "react-query";
 import { useQueryCall } from "./Utils/api";
 import { Spinner } from "./components/ui/spinner";
 import { useEffect } from "react";
@@ -24,7 +22,10 @@ import Orders from "./pages/Orders";
 import Analytics from "./pages/Analytics";
 import Billing from "./pages/Billing";
 import Settings from "./pages/Settings";
+import Manage from "./pages/Manage";
 // import Settings from "./pages/Settings";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,8 +34,6 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: true,
       retry: 0,
       staleTime: 0,
-      cacheTime: 0,
-      keepPreviousData: false,
     },
   },
 });
@@ -43,6 +42,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="owl-ui-theme">
       <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools initialIsOpen={false} />
         <AppRoutes />
       </QueryClientProvider>
     </ThemeProvider>
@@ -107,6 +107,7 @@ const LoggedInRoutes = () => (
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/live" element={<LiveLTP />} />
+          <Route path="/manage" element={<Manage />} />
           <Route path="/positions" element={<Positions />} />
           <Route path="/holdings" element={<Holdings />} />
           <Route path="/orders" element={<Orders />} />

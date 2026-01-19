@@ -12,4 +12,5 @@ export const ENDPOINTS = {
   SSE_LIVE: "https://owlbe.bitstreak.in/api/v1/sse/ltp",
   LTP_SNAPSHOT: "https://owlbe.bitstreak.in/api/v1/sse/live",
   KITE_CREDENTIALS: "https://owlbe.bitstreak.in/api/v1/kite/credentials",
+  NEWS: "https://newsdata.io/api/1/latest?apikey=pub_9eca01aef3494be0aff12bcf9127dbce&country=in&language=en&category=business",
 };
