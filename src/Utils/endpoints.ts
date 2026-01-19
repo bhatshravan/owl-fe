@@ -11,4 +11,5 @@ export const ENDPOINTS = {
   POSITIONS: "https://owlbe.bitstreak.in/api/v1/kite/positions",
   SSE_LIVE: "https://owlbe.bitstreak.in/api/v1/sse/ltp",
   LTP_SNAPSHOT: "https://owlbe.bitstreak.in/api/v1/sse/live",
+  KITE_CREDENTIALS: "https://owlbe.bitstreak.in/api/v1/kite/credentials",
 };
