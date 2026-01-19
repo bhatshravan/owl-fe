@@ -214,3 +214,152 @@
 .dark .ant-empty-description {
   color: var(--muted-foreground);
 }
+
+/* Antd Typography dark mode overrides */
+.dark .ant-typography {
+  color: var(--foreground) !important;
+}
+
+.dark h1.ant-typography,
+.dark h2.ant-typography,
+.dark h3.ant-typography,
+.dark h4.ant-typography,
+.dark h5.ant-typography,
+.dark h6.ant-typography {
+  color: var(--foreground) !important;
+}
+
+.dark .ant-typography-secondary {
+  color: var(--muted-foreground) !important;
+}
+
+.dark .ant-typography-success {
+  color: var(--bullish) !important;
+}
+
+.dark .ant-typography-warning {
+  color: oklch(0.75 0.15 80) !important;
+}
+
+.dark .ant-typography-danger {
+  color: var(--bearish) !important;
+}
+
+/* Antd Tag dark mode overrides */
+.dark .ant-tag {
+  background: var(--secondary);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.dark .ant-tag-success {
+  background: oklch(0.3 0.15 160);
+  border-color: var(--bullish);
+  color: var(--bullish);
+}
+
+.dark .ant-tag-processing {
+  background: oklch(0.25 0.12 250);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.dark .ant-tag-error {
+  background: oklch(0.3 0.15 25);
+  border-color: var(--bearish);
+  color: var(--bearish);
+}
+
+.dark .ant-tag-warning {
+  background: oklch(0.3 0.1 80);
+  border-color: oklch(0.75 0.15 80);
+  color: oklch(0.75 0.15 80);
+}
+
+.dark .ant-tag-default {
+  background: var(--secondary);
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+.dark .ant-tag-green {
+  background: oklch(0.3 0.15 160);
+  border-color: var(--bullish);
+  color: var(--bullish);
+}
+
+.dark .ant-tag-red {
+  background: oklch(0.3 0.15 25);
+  border-color: var(--bearish);
+  color: var(--bearish);
+}
+
+/* Antd Input dark mode overrides */
+.dark .ant-input {
+  background: var(--input) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.dark .ant-input::placeholder {
+  color: var(--muted-foreground) !important;
+}
+
+.dark .ant-input-prefix {
+  color: var(--muted-foreground) !important;
+}
+
+.dark .ant-input-suffix {
+  color: var(--muted-foreground) !important;
+}
+
+/* Antd Switch dark mode overrides */
+.dark .ant-switch {
+  background: var(--secondary);
+}
+
+.dark .ant-switch-checked {
+  background: var(--primary);
+}
+
+/* Antd Flex container - ensure it doesn't override text colors */
+.dark .ant-flex {
+  color: inherit;
+}
+
+/* Antd Button dark mode overrides */
+.dark .ant-btn {
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.dark .ant-btn-default {
+  background: var(--secondary);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.dark .ant-btn-default:hover {
+  background: var(--accent);
+  border-color: var(--primary);
+  color: var(--foreground);
+}
+
+.dark .ant-btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dark .ant-btn-primary:hover {
+  background: oklch(0.65 0.2 250);
+  border-color: oklch(0.65 0.2 250);
+}
+
+.dark .ant-btn-link {
+  color: var(--primary);
+}
+
+.dark .ant-btn-link:hover {
+  color: oklch(0.65 0.2 250);
+}

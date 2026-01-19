@@ -1,10 +1,11 @@
-import { useMemo, useState } from "react";
-import { Flex, Table, Typography, Tag, Input } from "antd";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { Flex, Table, Typography, Tag, Input, Switch } from "antd";
 import { useSSE } from "@/hooks/useSSE";
 import type { SSEStatus } from "@/hooks/useSSE";
 import { ENDPOINTS } from "@/Utils/endpoints";
+import { API } from "@/Utils/api";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Wifi, WifiOff, Loader2, Search } from "lucide-react";
+import { RefreshCw, Wifi, WifiOff, Loader2, Search, Clock } from "lucide-react";
 
 const { Title, Text } = Typography;
 
@@ -40,12 +41,106 @@ function StatusBadge({ status }: { status: SSEStatus }) {
   );
 }
 
+type DataMode = "sse" | "polling";
+
 export default function LiveLTP() {
   const [searchText, setSearchText] = useState("");
-  const { data, status, error, reconnect, disconnect } = useSSE({
+  const [dataMode, setDataMode] = useState<DataMode>("polling");
+  const [pollingData, setPollingData] = useState<Map<string, any>>(new Map());
+  const [pollingError, setPollingError] = useState<string | null>(null);
+  const [pollingStatus, setPollingStatus] = useState<SSEStatus>("disconnected");
+  const [lastPollingUpdate, setLastPollingUpdate] = useState<Date | null>(null);
+
+  const {
+    data: sseData,
+    status: sseStatus,
+    error: sseError,
+    reconnect,
+    disconnect,
+  } = useSSE({
     url: ENDPOINTS.SSE_LIVE,
-    enabled: true,
+    enabled: dataMode === "sse",
   });
+  console.log("🚀 ~ LiveLTP ~ sseData:", sseData);
+
+  // Fetch LTP snapshot data
+  const fetchSnapshot = useCallback(async () => {
+    try {
+      setPollingStatus("connecting");
+      setPollingError(null);
+      const response = await API.get(ENDPOINTS.LTP_SNAPSHOT);
+
+      const newData = new Map();
+
+      if (Array.isArray(response.data)) {
+        // Handle array format
+        response.data.forEach((item: any) => {
+          const ltp = parseFloat(item.lp || item.ltp || "0");
+          const open = parseFloat(item.open || "0");
+          const change = ltp - open;
+          const changePercent = open !== 0 ? (change / open) * 100 : 0;
+
+          newData.set(item.symbol, {
+            symbol: item.symbol,
+            ltp,
+            change,
+            changePercent,
+            volume: item.volume || 0,
+          });
+        });
+      } else if (typeof response.data === "object" && response.data !== null) {
+        // Handle object format with token IDs as keys (e.g., {"6994": {...}, "26000": {...}})
+        Object.values(response.data).forEach((item: any) => {
+          if (item.symbol) {
+            const ltp = parseFloat(item.lp || item.ltp || "0");
+            const open = parseFloat(item.open || "0");
+            const change = ltp - open;
+            const changePercent = open !== 0 ? (change / open) * 100 : 0;
+
+            newData.set(item.symbol, {
+              symbol: item.symbol,
+              ltp,
+              change,
+              changePercent,
+              volume: item.volume || 0,
+            });
+          }
+        });
+      }
+
+      setPollingData(newData);
+      setPollingStatus("connected");
+      setLastPollingUpdate(new Date());
+    } catch (err: any) {
+      setPollingError(err?.message || "Failed to fetch snapshot data");
+      setPollingStatus("error");
+    }
+  }, []);
+
+  // Polling effect
+  useEffect(() => {
+    if (dataMode !== "polling") {
+      return;
+    }
+
+    // Fetch immediately when switching to polling mode (async to avoid cascading renders)
+    const initialTimeout = setTimeout(() => {
+      fetchSnapshot();
+    }, 0);
+
+    // Set up 30-second polling
+    const intervalId = setInterval(fetchSnapshot, 30000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(intervalId);
+    };
+  }, [dataMode, fetchSnapshot]);
+
+  // Determine active data source
+  const data = dataMode === "sse" ? sseData : pollingData;
+  const status = dataMode === "sse" ? sseStatus : pollingStatus;
+  const error = dataMode === "sse" ? sseError : pollingError;
 
   const tableData = useMemo(() => {
     const items = Array.from(data.values());
@@ -121,6 +216,27 @@ export default function LiveLTP() {
     },
   ];
 
+  const handleModeToggle = (checked: boolean) => {
+    setDataMode(checked ? "polling" : "sse");
+    if (!checked) {
+      // Switching to SSE, disconnect polling
+      setPollingData(new Map());
+      setPollingError(null);
+      setPollingStatus("disconnected");
+    } else {
+      // Switching to polling, disconnect SSE
+      disconnect();
+    }
+  };
+
+  const handleManualRefresh = () => {
+    if (dataMode === "polling") {
+      fetchSnapshot();
+    } else {
+      reconnect();
+    }
+  };
+
   return (
     <Flex vertical gap="large">
       <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
@@ -131,7 +247,19 @@ export default function LiveLTP() {
           <StatusBadge status={status} />
         </Flex>
 
-        <Flex gap="small" align="center">
+        <Flex gap="middle" align="center" wrap="wrap">
+          <Flex align="center" gap="small">
+            <Wifi className="h-4 w-4" />
+            <Text>SSE</Text>
+            <Switch
+              checked={dataMode === "polling"}
+              onChange={handleModeToggle}
+              style={{ margin: "0 4px" }}
+            />
+            <Clock className="h-4 w-4" />
+            <Text>Polling (30s)</Text>
+          </Flex>
+
           <Input
             placeholder="Search symbol..."
             prefix={<Search className="h-4 w-4 text-muted-foreground" />}
@@ -140,15 +268,23 @@ export default function LiveLTP() {
             style={{ width: 200 }}
             allowClear
           />
-          {status === "connected" ? (
-            <Button variant="outline" size="sm" onClick={disconnect}>
-              <WifiOff className="h-4 w-4 mr-1" />
-              Disconnect
-            </Button>
+
+          {dataMode === "sse" ? (
+            status === "connected" ? (
+              <Button variant="outline" size="sm" onClick={disconnect}>
+                <WifiOff className="h-4 w-4 mr-1" />
+                Disconnect
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" onClick={reconnect}>
+                <RefreshCw className="h-4 w-4 mr-1" />
+                Reconnect
+              </Button>
+            )
           ) : (
-            <Button variant="outline" size="sm" onClick={reconnect}>
+            <Button variant="outline" size="sm" onClick={handleManualRefresh}>
               <RefreshCw className="h-4 w-4 mr-1" />
-              Reconnect
+              Refresh Now
             </Button>
           )}
         </Flex>
@@ -188,7 +324,13 @@ export default function LiveLTP() {
         <span>
           {tableData.length} symbol{tableData.length !== 1 ? "s" : ""} displayed
         </span>
-        <span>Data updates in real-time via SSE</span>
+        <span>
+          {dataMode === "sse"
+            ? "Data updates in real-time via SSE"
+            : lastPollingUpdate
+            ? `Last updated: ${lastPollingUpdate.toLocaleTimeString()} (refreshes every 30s)`
+            : "Polling every 30 seconds"}
+        </span>
       </Flex>
     </Flex>
   );

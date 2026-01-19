@@ -9,5 +9,6 @@ export const ENDPOINTS = {
   INSTRUMENTS_BY_TYPE: (type: string) =>
     `https://owlbe.bitstreak.in/api/v1/instruments/type/${type}`,
   POSITIONS: "https://owlbe.bitstreak.in/api/v1/kite/positions",
-  SSE_LIVE: "https://owlbe.bitstreak.in/api/v1/sse/live",
+  SSE_LIVE: "https://owlbe.bitstreak.in/api/v1/sse/ltp",
+  LTP_SNAPSHOT: "https://owlbe.bitstreak.in/api/v1/sse/live",
 };

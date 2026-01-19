@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   Bird,
+  TriangleDashedIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,6 +33,11 @@ const tradingItems = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Manage",
+    url: "/manage",
+    icon: TriangleDashedIcon,
   },
   {
     title: "Live LTP",

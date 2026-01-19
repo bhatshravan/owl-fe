@@ -96,12 +96,17 @@ export function useSSE({
         const parsed = JSON.parse(event.data);
 
         if (Array.isArray(parsed)) {
+          // Handle array format
           setData((prev) => {
             const newMap = new Map(prev);
-            parsed.forEach((item: LTPData) => {
+            parsed.forEach((item: any) => {
               if (item.symbol) {
                 newMap.set(item.symbol, {
-                  ...item,
+                  symbol: item.symbol,
+                  ltp: item.ltp || item.lp || 0,
+                  change: item.change || 0,
+                  changePercent: item.changePercent || 0,
+                  volume: item.volume || 0,
                   timestamp: item.timestamp || Date.now(),
                 });
               }
@@ -109,17 +114,45 @@ export function useSSE({
             return newMap;
           });
         } else if (parsed.symbol) {
+          // Handle single object format
           setData((prev) => {
             const newMap = new Map(prev);
             newMap.set(parsed.symbol, {
-              ...parsed,
+              symbol: parsed.symbol,
+              ltp: parsed.ltp || parsed.lp || 0,
+              change: parsed.change || 0,
+              changePercent: parsed.changePercent || 0,
+              volume: parsed.volume || 0,
               timestamp: parsed.timestamp || Date.now(),
             });
             return newMap;
           });
+        } else if (typeof parsed === "object" && !Array.isArray(parsed)) {
+          // Handle object with token IDs as keys (e.g., {"6994": {...}, "26000": {...}})
+          setData((prev) => {
+            const newMap = new Map(prev);
+            Object.values(parsed).forEach((item: any) => {
+              if (item.symbol) {
+                const ltp = parseFloat(item.lp || item.ltp || "0");
+                const open = parseFloat(item.open || "0");
+                const change = ltp - open;
+                const changePercent = open !== 0 ? (change / open) * 100 : 0;
+
+                newMap.set(item.symbol, {
+                  symbol: item.symbol,
+                  ltp,
+                  change,
+                  changePercent,
+                  volume: item.volume || 0,
+                  timestamp: Date.now(),
+                });
+              }
+            });
+            return newMap;
+          });
         }
-      } catch {
-        console.error("Failed to parse SSE message");
+      } catch (err) {
+        console.error("Failed to parse SSE message:", err);
       }
     };
 
