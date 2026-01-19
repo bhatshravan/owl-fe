@@ -23,7 +23,7 @@ export default function News() {
   const [opened, setOpened] = useState(false);
   const [modalData] = useState("");
     const newsQuery = useQueryCall("news", "get", "NEWS", {});
-  const { data }: any = newsQuery;
+  const data: any = newsQuery.data;
   
 
   // pub_9eca01aef3494be0aff12bcf9127dbce

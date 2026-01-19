@@ -117,6 +117,10 @@ export const useQueryCall = (
         method,
         url: endpoint as string,
         data: dataInput,
+      }).then((response) => {
+        return response.data;
+      }).catch((error) => {
+        return error;
       });
     },
     ...options,

@@ -82,10 +82,88 @@ const columns = [
   },
 ];
 
+// Define the Holding interface to ensure type safety
+interface Holding {
+  tradingsymbol: string;
+  exchange: string;
+  instrument_token: number;
+  isin: string;
+  product: string;
+  price: number; // This seems to be 0 in the example, likely avg cost is what we want
+  quantity: number;
+  used_quantity: number;
+  t1_quantity: number;
+  realised_quantity: number;
+  authorised_quantity: number;
+  authorised_date: string;
+  opening_quantity: number;
+  short_quantity: number;
+  collateral_quantity: number;
+  collateral_type: string;
+  discrepancy: boolean;
+  average_price: number;
+  last_price: number;
+  close_price: number;
+  pnl: number;
+  day_change: number;
+  day_change_percentage: number;
+  mtf: {
+    quantity: number;
+    used_quantity: number;
+    average_price: number;
+    value: number;
+    initial_margin: number;
+  };
+  // Derived fields
+  value?: number;
+  pnl_pct?: number;
+}
+
+import { useQueryCall } from "@/Utils/api";
+import { useMemo } from "react";
+
 export default function Holdings() {
-  // TODO: Integrate with actual holdings API endpoint
-  const holdings: any[] = [];
-  const isLoading = false;
+  const { data, isLoading }:any = useQueryCall(
+    ["HOLDINGS_DATA"],
+    "GET",
+    "HOLDINGS"
+  ) as any;
+
+  const holdings = useMemo(() => {
+    const rawHoldings: Holding[] = data?.data || [];
+    return rawHoldings.map((item) => {
+      const value = item.last_price * item.quantity;
+      const investment = item.average_price * item.quantity;
+      // Protect against division by zero
+      const pnl_pct = investment !== 0
+        ? ((value - investment) / investment) * 100
+        : 0;
+
+      return {
+        ...item,
+        value,
+        pnl_pct,
+      };
+    });
+  }, [data]);
+
+  const summary = useMemo(() => {
+    let totalInvestment = 0;
+    let currentValue = 0;
+    let totalPnl = 0;
+
+    holdings.forEach((h) => {
+      totalInvestment += h.average_price * h.quantity;
+      currentValue += h.value || 0;
+      totalPnl += h.pnl;
+    });
+
+    return {
+      totalInvestment,
+      currentValue,
+      totalPnl,
+    };
+  }, [holdings]);
 
   return (
     <Flex vertical gap="large">
@@ -106,7 +184,9 @@ export default function Holdings() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">
+              ₹{summary.totalInvestment.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </CardContent>
         </Card>
 
@@ -118,7 +198,9 @@ export default function Holdings() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">
+              ₹{summary.currentValue.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </CardContent>
         </Card>
 
@@ -127,10 +209,16 @@ export default function Holdings() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total P&L
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            {summary.totalPnl >= 0 ? (
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            )}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className={`text-2xl font-bold ${summary.totalPnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+              ₹{summary.totalPnl.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </CardContent>
         </Card>
       </div>

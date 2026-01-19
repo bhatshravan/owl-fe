@@ -79,10 +79,56 @@ const columns = [
   },
 ];
 
+interface Order {
+  account_id: string;
+  order_id: string;
+  exchange_order_id: string;
+  parent_order_id: string | null;
+  status: string;
+  status_message: string | null;
+  order_timestamp: string;
+  exchange: string;
+  tradingsymbol: string;
+  instrument_token: number;
+  order_type: string;
+  transaction_type: string;
+  validity: string;
+  product: string;
+  quantity: number;
+  price: number;
+  average_price: number;
+  filled_quantity: number;
+  pending_quantity: number;
+  cancelled_quantity: number;
+  market_protection: number;
+}
+
+import { useQueryCall } from "@/Utils/api";
+import { useMemo } from "react";
+
 export default function Orders() {
-  // TODO: Integrate with actual orders API endpoint
-  const orders: any[] = [];
-  const isLoading = false;
+  const { data, isLoading } = useQueryCall(
+    ["ORDERS_DATA"],
+    "GET",
+    "ORDERS"
+  ) as any;
+
+  const orders: Order[] = useMemo(() => {
+    return data?.data || [];
+  }, [data]);
+
+  const summary = useMemo(() => {
+    return orders.reduce(
+      (acc, order) => {
+        acc.total++;
+        if (order.status === "COMPLETE") acc.completed++;
+        else if (order.status === "REJECTED" || order.status === "CANCELLED") acc.rejected++;
+        else if (order.status === "OPEN" || order.status === "PENDING" || order.status === "TRIGGER PENDING") acc.pending++;
+        return acc;
+      },
+      { total: 0, completed: 0, rejected: 0, pending: 0 }
+    );
+  }, [orders]);
 
   return (
     <Flex vertical gap="large">
@@ -103,7 +149,7 @@ export default function Orders() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">{summary.total}</div>
           </CardContent>
         </Card>
 
@@ -112,10 +158,10 @@ export default function Orders() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Completed
             </CardTitle>
-            <CheckCircle className="h-4 w-4 text-bullish" />
+            <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">{summary.completed}</div>
           </CardContent>
         </Card>
 
@@ -127,7 +173,7 @@ export default function Orders() {
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">{summary.pending}</div>
           </CardContent>
         </Card>
 
@@ -136,10 +182,10 @@ export default function Orders() {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Rejected
             </CardTitle>
-            <XCircle className="h-4 w-4 text-bearish" />
+            <XCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">—</div>
+            <div className="text-2xl font-bold">{summary.rejected}</div>
           </CardContent>
         </Card>
       </div>
